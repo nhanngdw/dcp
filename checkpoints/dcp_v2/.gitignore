@@ -2,3 +2,4 @@
 *.tfevents
 *.log
 *.backup
+**/events.out.tfevents.*
