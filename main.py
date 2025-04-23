@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-
+torch.cuda.empty_cache()
 # Part of the code is referred from: https://github.com/floodsung/LearningToCompare_FSL
 
 class IOStream:
@@ -395,9 +395,9 @@ def train(args, net, train_loader, test_loader, boardio, textio):
             best_test_t_mae_ba = test_t_mae_ba
 
             if torch.cuda.device_count() > 1:
-                torch.save(net.module.state_dict(), 'checkpoints/%s/models/model.best.t7' % args.exp_name)
+                torch.save(net.module.state_dict(), 'checkpoints/%s/models/model.best.pth' % args.exp_name)
             else:
-                torch.save(net.state_dict(), 'checkpoints/%s/models/model.best.t7' % args.exp_name)
+                torch.save(net.state_dict(), 'checkpoints/%s/models/model.best.pth' % args.exp_name)
 
         textio.cprint('==TRAIN==')
         textio.cprint('A--------->B')
@@ -506,9 +506,9 @@ def train(args, net, train_loader, test_loader, boardio, textio):
         boardio.add_scalar('B->A/best_test/translation/MAE', best_test_t_mae_ba, epoch)
 
         if torch.cuda.device_count() > 1:
-            torch.save(net.module.state_dict(), 'checkpoints/%s/models/model.%d.t7' % (args.exp_name, epoch))
+            torch.save(net.module.state_dict(), 'checkpoints/%s/models/model.%d.pth' % (args.exp_name, epoch))
         else:
-            torch.save(net.state_dict(), 'checkpoints/%s/models/model.%d.t7' % (args.exp_name, epoch))
+            torch.save(net.state_dict(), 'checkpoints/%s/models/model.%d.pth' % (args.exp_name, epoch))
         gc.collect()
 
 
@@ -538,7 +538,7 @@ def main():
                         help='Num of dimensions of fc in transformer')
     parser.add_argument('--dropout', type=float, default=0.0, metavar='N',
                         help='Dropout ratio in transformer')
-    parser.add_argument('--batch_size', type=int, default=32, metavar='batch_size',
+    parser.add_argument('--batch_size', type=int, default=16, metavar='batch_size',
                         help='Size of batch)')
     parser.add_argument('--test_batch_size', type=int, default=10, metavar='batch_size',
                         help='Size of batch)')
@@ -546,7 +546,7 @@ def main():
                         help='number of episode to train ')
     parser.add_argument('--use_sgd', action='store_true', default=False,
                         help='Use SGD')
-    parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.005, metavar='LR',
                         help='learning rate (default: 0.001, 0.1 if using sgd)')
     parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
                         help='SGD momentum (default: 0.9)')
@@ -599,7 +599,7 @@ def main():
         net = DCP(args).cuda()
         if args.eval:
             if args.model_path is '':
-                model_path = 'checkpoints' + '/' + args.exp_name + '/models/model.best.t7'
+                model_path = 'checkpoints' + '/' + args.exp_name + '/models/model.best.pth'
             else:
                 model_path = args.model_path
                 print(model_path)
